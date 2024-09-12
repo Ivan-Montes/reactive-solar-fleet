@@ -8,7 +8,7 @@ Manage your solar space fleet with this project. It is a combination of Microser
 - REST API ms-position with [OpenApi Swagger](https://swagger.io/) and two separate DB for R/RW actions [8081]
 - REST API ms-shipclass with [OpenApi Swagger](https://swagger.io/) and two separate DB for R/RW actions [8082]
 - REST API ms-spacecraft with [OpenApi Swagger](https://swagger.io/) and two separate DB for R/RW actions [8083]
-- REST API ms-crew with [OpenApi Swagger](https://swagger.io/) and two separate DB for R/RW actions [8084]
+- REST API ms-crewmember with [OpenApi Swagger](https://swagger.io/) and two separate DB for R/RW actions [8084]
 
 ```mermaid
   
@@ -59,12 +59,13 @@ The dev environment is ready for using with your IDE. The microservice attempts 
 
 First of all, please visit the REST API documentation. Replace ${port} for the suitable microservice port:
 
-    http://localhost:${port}/swagger-ui/index.html
+    http://localhost:${port}/swagger-ui.html
     
 [Kafka-UI](https://docs.kafka-ui.provectus.io/) allow you to check your [Kafka](https://kafka.apache.org/) server using a practical dashboard, so visit the following url:
 
     http://localhost:8080
-    
+
+The initial data load is performed by the kafka-data-init microservice. It uses Kafka to publish events, which the other microservices then use to update their databases.    
 
 ## Features
 
@@ -98,7 +99,7 @@ Just me, [Iván](https://github.com/Ivan-Montes) :sweat_smile:
 ---
 
 
-[![Java](https://badgen.net/static/JavaSE/17/orange)](https://www.java.com/es/)
+[![Java](https://badgen.net/static/JavaSE/21/orange)](https://www.java.com/es/)
 [![Maven](https://badgen.net/badge/icon/maven?icon=maven&label&color=red)](https://https://maven.apache.org/)
 [![Spring](https://img.shields.io/badge/spring-blue?logo=Spring&logoColor=white)](https://spring.io)
 [![GitHub](https://badgen.net/badge/icon/github?icon=github&label)](https://github.com)
