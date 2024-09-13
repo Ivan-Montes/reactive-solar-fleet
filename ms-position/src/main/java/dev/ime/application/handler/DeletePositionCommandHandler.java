@@ -26,15 +26,15 @@ public class DeletePositionCommandHandler implements CommandHandler{
 	private final EventWriteRepositoryPort eventWriteRepositoryPort;
 	private final ObjectMapper objectMapper;
 	private final ReadRepositoryPort<Position> readRepositoryPort;
-	private final RedisCheckerEntityPort crewMemberRedisDbCheckerEntityAdapter;
+	private final RedisCheckerEntityPort redisCheckerEntityPort;
 
 	public DeletePositionCommandHandler(EventWriteRepositoryPort eventWriteRepositoryPort, ObjectMapper objectMapper,
-			ReadRepositoryPort<Position> readRepositoryPort, RedisCheckerEntityPort crewMemberRedisDbCheckerEntityAdapter) {
+			ReadRepositoryPort<Position> readRepositoryPort, RedisCheckerEntityPort redisCheckerEntityPort) {
 		super();
 		this.eventWriteRepositoryPort = eventWriteRepositoryPort;
 		this.objectMapper = objectMapper;
 		this.readRepositoryPort = readRepositoryPort;
-		this.crewMemberRedisDbCheckerEntityAdapter = crewMemberRedisDbCheckerEntityAdapter;
+		this.redisCheckerEntityPort = redisCheckerEntityPort;
 	}
 
 	@Override
@@ -65,7 +65,7 @@ public class DeletePositionCommandHandler implements CommandHandler{
 	private Mono<DeletePositionCommand> validatePositionIsInCrew(DeletePositionCommand deleteCommand){
 		
 		return Mono.justOrEmpty(deleteCommand.positionId())
-				.flatMap(crewMemberRedisDbCheckerEntityAdapter::existsAnyPositionInCrewMember)
+				.flatMap(redisCheckerEntityPort::existsAnyPositionInCrewMember)
 				.filter( bool -> !bool )
 				.switchIfEmpty(Mono.error(new EntityAssociatedException(Map.of(GlobalConstants.POSITION_ID, deleteCommand.positionId().toString()))))
 				.thenReturn(deleteCommand);	
