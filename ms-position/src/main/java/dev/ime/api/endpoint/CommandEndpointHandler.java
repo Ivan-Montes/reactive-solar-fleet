@@ -11,6 +11,7 @@ import org.springframework.web.reactive.function.server.ServerResponse;
 import dev.ime.api.error.ErrorHandler;
 import dev.ime.api.error.DtoValidator;
 import dev.ime.application.dto.PositionDto;
+import dev.ime.application.exception.EmptyResponseException;
 import dev.ime.application.exception.InvalidUUIDException;
 import dev.ime.config.GlobalConstants;
 import dev.ime.domain.port.inbound.CommandEndpointPort;
@@ -42,7 +43,7 @@ public class CommandEndpointHandler implements CommandEndpointPort{
             summary = "Create a Position",
             description = "Returns created Position",
             requestBody = @io.swagger.v3.oas.annotations.parameters.RequestBody(
-                    description = "Position object that needs to be updated",
+                    description = "Position object that needs to be created",
                     required = true,
                     content = @Content(
                         mediaType = "application/json",
@@ -65,7 +66,9 @@ public class CommandEndpointHandler implements CommandEndpointPort{
 				.flatMap(dtoValidator::validateDto)
 				.flatMap(commandService::create)
 				.flatMap( objSaved -> ServerResponse.ok().bodyValue(objSaved))
-				.switchIfEmpty(ServerResponse.noContent().build())
+				.switchIfEmpty(Mono.error(new EmptyResponseException(Map.of(
+		                serverRequest.path(), GlobalConstants.MSG_NODATA
+		            ))))
 				.onErrorResume(errorHandler::handleException);
 	}
 
@@ -97,13 +100,15 @@ public class CommandEndpointHandler implements CommandEndpointPort{
 		
 		return Mono.justOrEmpty(serverRequest.pathVariable("id"))
 				.map(UUID::fromString)
-				.onErrorMap(IllegalArgumentException.class, error -> new InvalidUUIDException(Map.of(GlobalConstants.POSITION_ID, serverRequest.pathVariable("id"))))
+				.onErrorMap(IllegalArgumentException.class, error -> new InvalidUUIDException(Map.of(GlobalConstants.POSITION_ID, GlobalConstants.MSG_NODATA)))
 				.flatMap( id -> serverRequest.bodyToMono(PositionDto.class)
 						.flatMap(dtoValidator::validateDto)
 						.flatMap( dto -> commandService.update(id, dto))
 						)
 				.flatMap( objSaved -> ServerResponse.ok().bodyValue(objSaved))
-				.switchIfEmpty(ServerResponse.notFound().build())
+				.switchIfEmpty(Mono.error(new EmptyResponseException(Map.of(
+		                serverRequest.path(), GlobalConstants.MSG_NODATA
+		            ))))
 				.onErrorResume(errorHandler::handleException);
 		
 	}
@@ -129,7 +134,9 @@ public class CommandEndpointHandler implements CommandEndpointPort{
 		.map(UUID::fromString)
 		.flatMap(commandService::deleteById)
 		.flatMap( obj -> ServerResponse.ok().bodyValue(obj))
-		.switchIfEmpty(ServerResponse.notFound().build())
+		.switchIfEmpty(Mono.error(new EmptyResponseException(Map.of(
+                serverRequest.path(), GlobalConstants.MSG_NODATA
+            ))))
 		.onErrorResume(errorHandler::handleException);
 		
 	}

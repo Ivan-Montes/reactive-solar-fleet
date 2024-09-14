@@ -8,6 +8,7 @@ import org.springframework.web.reactive.function.server.ServerResponse;
 
 import dev.ime.application.dto.ErrorResponse;
 import dev.ime.application.exception.BasicException;
+import dev.ime.application.exception.EmptyResponseException;
 import dev.ime.application.exception.InvalidUUIDException;
 import dev.ime.application.exception.UniqueValueException;
 import dev.ime.application.exception.ValidationException;
@@ -38,7 +39,8 @@ public class ErrorHandler{
 				ValidationException.class, this::handleBasicExceptionExtendedClasses,
 				UniqueValueException.class, this::handleBasicExceptionExtendedClasses,
 				InvalidUUIDException.class, this::handleBasicExceptionExtendedClasses,
-				ResourceNotFoundException.class, this::handleBasicExceptionExtendedClasses
+				ResourceNotFoundException.class, this::handleBasicExceptionExtendedClasses,
+				EmptyResponseException.class, this::handleBasicExceptionExtendedClasses
 				);		
 	 }	 
 	

@@ -9,6 +9,7 @@ import org.springframework.web.reactive.function.server.ServerResponse;
 
 import dev.ime.api.error.ErrorHandler;
 import dev.ime.application.dto.PositionDto;
+import dev.ime.application.exception.EmptyResponseException;
 import dev.ime.application.exception.InvalidUUIDException;
 import dev.ime.config.GlobalConstants;
 import dev.ime.config.PositionMapper;
@@ -58,7 +59,9 @@ public class QueryEndpointHandler implements QueryEndpointPort{
                 .map(positionMapper::fromDomainToDto)
                 .collectList() 
                 .flatMap(dtos -> ServerResponse.ok().bodyValue(dtos))
-                .switchIfEmpty(ServerResponse.notFound().build())
+                .switchIfEmpty(Mono.error(new EmptyResponseException(Map.of(
+		                serverRequest.path(), GlobalConstants.MSG_NODATA
+		            ))))
                 .onErrorResume(errorHandler::handleException);
     }
     @Operation(
@@ -89,12 +92,14 @@ public class QueryEndpointHandler implements QueryEndpointPort{
 						.getById(id)
 						.map(positionMapper::fromDomainToDto)
 						.flatMap( dto -> ServerResponse.ok().bodyValue(dto))
-		                .switchIfEmpty(ServerResponse.notFound().build())
+						.switchIfEmpty(Mono.error(new EmptyResponseException(Map.of(
+				                serverRequest.path(), GlobalConstants.MSG_NODATA
+				            ))))
 						.onErrorResume(errorHandler::handleException);
 				
 			} catch (IllegalArgumentException error) {
 					
-	            return errorHandler.handleException(new InvalidUUIDException(Map.of(GlobalConstants.POSITION_ID, serverRequest.pathVariable("id"))));
+	            return errorHandler.handleException(new InvalidUUIDException(Map.of(GlobalConstants.POSITION_ID, GlobalConstants.MSG_NODATA)));
 	            
 	        }			
 		});

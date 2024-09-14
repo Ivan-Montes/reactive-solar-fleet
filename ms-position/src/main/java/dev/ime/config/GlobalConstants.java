@@ -90,6 +90,8 @@ public class GlobalConstants {
 	public static final String EX_INVALIDUUID_DESC = "Fail to parse UUID";
 	public static final String EX_PLAIN = "Exception";
 	public static final String EX_PLAIN_DESC = "Exception because the night is dark and full of terrors";
+	public static final String EX_EMPTYRESPONSE = "EmptyResponseException";
+	public static final String EX_EMPTYRESPONSE_DESC = "No freak out, just an Empty Response";
 	
 	
 }
