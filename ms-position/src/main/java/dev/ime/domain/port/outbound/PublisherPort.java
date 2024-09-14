@@ -1,9 +1,10 @@
 package dev.ime.domain.port.outbound;
 
 import dev.ime.domain.event.Event;
+import reactor.core.publisher.Mono;
 
 public interface PublisherPort {
 
-	void publishEvent(Event event);
+	Mono<Void> publishEvent(Event event);
 	
 }

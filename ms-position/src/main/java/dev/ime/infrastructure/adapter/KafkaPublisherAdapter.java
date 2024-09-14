@@ -1,7 +1,5 @@
 package dev.ime.infrastructure.adapter;
 
-import java.util.Optional;
-import java.util.concurrent.CompletableFuture;
 
 import org.apache.kafka.clients.producer.ProducerRecord;
 import org.springframework.kafka.core.KafkaTemplate;
@@ -12,6 +10,7 @@ import dev.ime.config.GlobalConstants;
 import dev.ime.config.LoggerUtil;
 import dev.ime.domain.event.Event;
 import dev.ime.domain.port.outbound.PublisherPort;
+import reactor.core.publisher.Mono;
 
 @Service
 public class KafkaPublisherAdapter implements PublisherPort{
@@ -27,27 +26,22 @@ public class KafkaPublisherAdapter implements PublisherPort{
 	}
 
 	@Override
-	public void publishEvent(Event event) {
+	public Mono<Void> publishEvent(Event event) {
 		
-		logInfo(GlobalConstants.MSG_PUBLISH_EVENT, event.toString());
-		CompletableFuture<SendResult<String, Object>> completableFuture = kafkaTemplate.send(new ProducerRecord<>(event.getEventType(), event));
-		completableFuture.whenComplete( (result, ex) -> 
-			
-			Optional.ofNullable(ex)
-			.ifPresentOrElse(
-						exception -> handleFailure(result, exception), 
-						() -> handleSuccess(result)
-					)		
-		);	
-		
+	    logInfo(GlobalConstants.MSG_PUBLISH_EVENT, event.toString());
+	    return Mono.fromFuture(kafkaTemplate.send(new ProducerRecord<>(event.getEventType(), event)))
+	               .doOnSuccess(this::handleSuccess)
+	               .doOnError(this::handleFailure)
+	               .then();
+	    
 	}
 
 	private void handleSuccess(SendResult<String, Object> result) {
 		logInfo(GlobalConstants.MSG_PUBLISH_OK, result.getProducerRecord().topic() + "]:[" + result.getProducerRecord().value() );
 	}
 
-    private void handleFailure(SendResult<String, Object> result, Throwable ex) {
-    	logInfo(GlobalConstants.MSG_PUBLISH_FAIL, result.getProducerRecord().topic() + "]:[" + result.getProducerRecord().value() + "]:[" + ex.getMessage() );
+	private void handleFailure(Throwable ex) {
+    	logInfo(GlobalConstants.MSG_PUBLISH_FAIL, ex.getMessage() );
     }
 
 	private void logInfo(String action, String clientInfo) {
