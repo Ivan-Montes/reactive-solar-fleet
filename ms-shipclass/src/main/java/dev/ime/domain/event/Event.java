@@ -1,6 +1,8 @@
 package dev.ime.domain.event;
 
 import java.time.Instant;
+import java.util.Collections;
+import java.util.HashMap;
 import java.util.Map;
 import java.util.Objects;
 import java.util.UUID;
@@ -22,7 +24,7 @@ public class Event {
 		this.eventCategory = eventCategory;
 		this.eventType = eventType;
 		this.eventTimestamp = Instant.now();
-		this.eventData = eventData;
+		this.eventData = Collections.unmodifiableMap(new HashMap<>(eventData));
 	}
 
     @JsonCreator
@@ -33,7 +35,7 @@ public class Event {
 		this.eventCategory = eventCategory;
 		this.eventType = eventType;
 		this.eventTimestamp = eventTimestamp;
-		this.eventData = eventData;
+		this.eventData = Collections.unmodifiableMap(new HashMap<>(eventData));
 	}
 
 	public UUID getEventId() {
