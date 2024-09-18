@@ -1,0 +1,66 @@
+spring:
+  application:
+    name: ms-crewmember
+  config:
+    import: optional:file:.env[.properties]
+    
+  data:  
+    mongodb:
+      uri: mongodb://sa:${MONGODB_PASS_WRITE:invalidPassword}@localhost:27020/mongo-write-db?authSource=admin      
+    redis:
+      database: 0
+      host: localhost
+      port: 6382
+      password: ${REDISDB_PASS:invalidPassword}
+      timeout: 60000  
+      
+  r2dbc:
+    url: r2dbc:${spring.r2dbc.driver}://${spring.r2dbc.host}:${spring.r2dbc.port}/${spring.r2dbc.database}
+    username: root
+    password: ${SQLDB_PASS}
+    database: crewmemberReadDb
+    host: localhost
+    port: 5435
+    driver: postgresql
+    
+  kafka:
+    producer:
+      bootstrap-servers: localhost:9092
+      key-serializer: org.apache.kafka.common.serialization.StringSerializer
+      value-serializer: org.springframework.kafka.support.serializer.JsonSerializer
+      properties:
+        acks: all
+        retries: 10
+        retry:
+          backoff:
+            ms: 1000
+    consumer:
+      bootstrap-servers: localhost:9092
+      key-deserializer: org.apache.kafka.common.serialization.StringDeserializer
+      value-deserializer: org.springframework.kafka.support.serializer.JsonDeserializer
+      auto-offset-reset: earliest
+      properties:
+        spring:
+           json:
+             trusted:
+               packages: '*' 
+                 
+server:
+  port: ${SERVER_PORT:8084}
+  
+properties:
+  uri:
+    endpointUri: "/api/v1/crewmembers"
+    
+
+# Logging para Spring Data y r2dbc
+logging:
+  level:
+    org:
+      springframework:
+        #data: DEBUG
+    io:
+      #r2dbc: DEBUG
+
+          
+
