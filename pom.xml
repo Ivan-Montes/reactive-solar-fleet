@@ -177,6 +177,7 @@
 		<module>ms-position</module>
 		<module>ms-shipclass</module>
 		<module>ms-spacecraft</module>
+		<module>ms-crewmember</module>
 	</modules>
 	
 </project>
