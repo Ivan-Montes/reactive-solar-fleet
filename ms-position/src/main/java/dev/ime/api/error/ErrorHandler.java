@@ -8,6 +8,7 @@ import org.springframework.web.reactive.function.server.ServerResponse;
 
 import dev.ime.application.dto.ErrorResponse;
 import dev.ime.application.exception.BasicException;
+import dev.ime.application.exception.CreateJpaEntityException;
 import dev.ime.application.exception.EmptyResponseException;
 import dev.ime.application.exception.InvalidUUIDException;
 import dev.ime.application.exception.UniqueValueException;
@@ -40,7 +41,8 @@ public class ErrorHandler{
 				UniqueValueException.class, this::handleBasicExceptionExtendedClasses,
 				InvalidUUIDException.class, this::handleBasicExceptionExtendedClasses,
 				ResourceNotFoundException.class, this::handleBasicExceptionExtendedClasses,
-				EmptyResponseException.class, this::handleBasicExceptionExtendedClasses
+				EmptyResponseException.class, this::handleBasicExceptionExtendedClasses,
+				CreateJpaEntityException.class, this::handleBasicExceptionExtendedClasses
 				);		
 	 }	 
 	
