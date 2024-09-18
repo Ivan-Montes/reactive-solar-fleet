@@ -7,12 +7,7 @@ import org.springframework.stereotype.Component;
 import org.springframework.web.reactive.function.server.ServerResponse;
 
 import dev.ime.application.dto.ErrorResponse;
-import dev.ime.application.exception.BasicException;
-import dev.ime.application.exception.EmptyResponseException;
-import dev.ime.application.exception.InvalidUUIDException;
-import dev.ime.application.exception.UniqueValueException;
-import dev.ime.application.exception.ValidationException;
-import dev.ime.application.exception.ResourceNotFoundException;
+import dev.ime.application.exception.*;
 import dev.ime.config.GlobalConstants;
 import dev.ime.config.LoggerUtil;
 import reactor.core.publisher.Mono;
@@ -40,7 +35,8 @@ public class ErrorHandler{
 				UniqueValueException.class, this::handleBasicExceptionExtendedClasses,
 				InvalidUUIDException.class, this::handleBasicExceptionExtendedClasses,
 				ResourceNotFoundException.class, this::handleBasicExceptionExtendedClasses,
-				EmptyResponseException.class, this::handleBasicExceptionExtendedClasses
+				EmptyResponseException.class, this::handleBasicExceptionExtendedClasses,
+				CreateJpaEntityException.class, this::handleBasicExceptionExtendedClasses
 				);		
 	 }	 
 	
