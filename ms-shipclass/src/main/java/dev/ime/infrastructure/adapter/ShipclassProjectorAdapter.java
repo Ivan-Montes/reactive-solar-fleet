@@ -1,7 +1,10 @@
 package dev.ime.infrastructure.adapter;
 
 import java.util.Map;
+import java.util.Optional;
 import java.util.UUID;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.data.r2dbc.core.R2dbcEntityTemplate;
@@ -10,6 +13,8 @@ import org.springframework.data.relational.core.query.Query;
 import org.springframework.data.relational.core.query.Update;
 import org.springframework.stereotype.Repository;
 
+import dev.ime.application.exception.CreateJpaEntityException;
+import dev.ime.application.exception.EmptyResponseException;
 import dev.ime.application.exception.UniqueValueException;
 import dev.ime.config.GlobalConstants;
 import dev.ime.config.LoggerUtil;
@@ -33,13 +38,16 @@ public class ShipclassProjectorAdapter implements BaseProjectorPort, ExtendedPro
 	}
 
 	@Override
-	public void create(Event event) {
+	public Mono<Void> create(Event event) {
 		
-		Mono.justOrEmpty( createJpaEntity(event) )
+		return Mono.justOrEmpty(event.getEventData())		        
+		.transform(this::logFlowStep)
+		.flatMap(this::createJpaEntity)		        
+		.transform(this::logFlowStep)
 		.flatMap(this::insertQuery)
-		.transform(this::addLogginOptionsReturnJpa)
-		.onErrorResume( e -> Mono.fromRunnable(()-> loggerUtil.logSevereAction(e.getMessage()) ))
-        .subscribe();
+		.switchIfEmpty(Mono.error(new EmptyResponseException(Map.of(GlobalConstants.SHIPCLASS_CAT, GlobalConstants.EX_EMPTYRESPONSE_DESC))))
+		.transform(this::addLogginOptions)
+        .then();
 		
 	}
 	
@@ -48,36 +56,63 @@ public class ShipclassProjectorAdapter implements BaseProjectorPort, ExtendedPro
         return r2dbcTemplate.insert(entity);
         
     }
-    
-    private Mono<ShipclassJpaEntity> addLogginOptionsReturnJpa(Mono<ShipclassJpaEntity> reactiveFlow) {
-       
-    	return reactiveFlow
-            .doOnSuccess(c -> logInfo(GlobalConstants.MSG_FLOW_OK, c.getShipclassId().toString()))
-            .doOnError(e -> logInfo(GlobalConstants.MSG_FLOW_ERROR, e.toString()))
-            .doFinally(signalType -> logInfo(GlobalConstants.MSG_FLOW_RESULT, signalType.toString()));
   
-    }
-    
-	private ShipclassJpaEntity createJpaEntity(Event event) {
+    private Mono<ShipclassJpaEntity> createJpaEntity(Map<String, Object> eventData) {
 		
-		return ShipclassJpaEntity
-	    		.builder()
-	    		.shipclassId( UUID.fromString( event.getEventData().get(GlobalConstants.SHIPCLASS_ID).toString() ) )
-	    		.shipclassName(event.getEventData().get(GlobalConstants.SHIPCLASS_NAME).toString())
-	    		.shipclassDescription(event.getEventData().get(GlobalConstants.SHIPCLASS_DESC).toString())
-	    		.build();
+		return Mono.fromCallable( () -> {
+			
+			UUID shipclassId = extractUuid(eventData, GlobalConstants.SHIPCLASS_ID);
+	        String shipclassName = extractString(eventData, GlobalConstants.SHIPCLASS_NAME);
+	        String shipclassDescription = extractString(eventData, GlobalConstants.SHIPCLASS_DESC);
+			
+			return ShipclassJpaEntity
+		    		.builder()
+		    		.shipclassId(shipclassId)
+		    		.shipclassName(shipclassName)
+		    		.shipclassDescription(shipclassDescription)
+		    		.build();
+			
+		}).onErrorMap(e -> new CreateJpaEntityException(Map.of( GlobalConstants.SHIPCLASS_CAT, e.getMessage() )));
 		
+	}
+
+	private UUID extractUuid(Map<String, Object> eventData, String key) {
+		
+	    return Optional.ofNullable(eventData.get(key))
+	                   .map(Object::toString)
+	                   .map(UUID::fromString)
+	                   .orElse(null);
+	    
+	}
+
+	private String extractString(Map<String, Object> eventData, String key) {
+		
+		String value = Optional.ofNullable(eventData.get(key))
+	                   .map(Object::toString)
+	                   .orElse("");
+	    
+	    Pattern compiledPattern = Pattern.compile(GlobalConstants.PATTERN_NAME_FULL);
+	    Matcher matcher = compiledPattern.matcher(value);
+	    if (!matcher.matches()) {
+	        throw new IllegalArgumentException(GlobalConstants.EX_ILLEGALARGUMENT_DESC + " OwO " +  key );
+	    }
+
+	    return value;
+	    
 	}
 	
 	@Override
-	public void update(Event event) {
+	public Mono<Void> update(Event event) {
 		
-		Mono.justOrEmpty(createJpaEntity(event))
+		return Mono.justOrEmpty(event.getEventData())		        
+		.transform(this::logFlowStep)
+		.flatMap(this::createJpaEntity)		        
+		.transform(this::logFlowStep)
 		.flatMap(this::validateNameAlreadyUsed)	
 		.flatMap(this::updateQuery)	
-		.transform(this::addLogginOptionsReturnLong)
-		.onErrorResume( e -> Mono.fromRunnable(()-> loggerUtil.logSevereAction(e.getMessage()) ))
-		.subscribe();
+		.switchIfEmpty(Mono.error(new EmptyResponseException(Map.of(GlobalConstants.SHIPCLASS_CAT, GlobalConstants.EX_EMPTYRESPONSE_DESC))))
+		.transform(this::addLogginOptions)
+        .then();
 		
 	}
 
@@ -101,27 +136,19 @@ public class ShipclassProjectorAdapter implements BaseProjectorPort, ExtendedPro
 		
 	}
 	
-	private Mono<Long> addLogginOptionsReturnLong(Mono<Long> reactiveFlow){
-	
-		return reactiveFlow		
-				.doOnSuccess(s -> logInfo(GlobalConstants.MSG_FLOW_OK, GlobalConstants.MSG_MODLINES + s.toString()))
-		        .doOnError(e -> logInfo(GlobalConstants.MSG_FLOW_ERROR, e.toString()))
-		        .doFinally(signalType -> logInfo(GlobalConstants.MSG_FLOW_RESULT, signalType.toString()));		
-	
-	}
-	
 	@Override
-	public void deleteById(Event event) {
+	public Mono<Void> deleteById(Event event) {
 
-		Mono.justOrEmpty(event.getEventData().get(GlobalConstants.SHIPCLASS_ID))
-		.switchIfEmpty(Mono.error(new IllegalArgumentException(GlobalConstants.SHIPCLASS_ID + GlobalConstants.MSG_REQUIRED)))
+		return Mono.justOrEmpty(event.getEventData())		        
+		.transform(this::logFlowStep)
+		.map( evenData -> evenData.get(GlobalConstants.SHIPCLASS_ID))
 		.cast(String.class)
-		.map(UUID::fromString)
-		.doOnNext( id -> logInfo(GlobalConstants.MSG_FLOW_PROCESS, event.getEventType() + " : " + id.toString()))
+		.map(UUID::fromString)			        
+		.transform(this::logFlowStep)
 		.flatMap( this::deleteByIdQuery )		
-		.transform(this::addLogginOptionsReturnLong)
-		.onErrorResume( e -> Mono.fromRunnable(()-> loggerUtil.logSevereAction(e.getMessage()) ))
-		.subscribe();
+		.switchIfEmpty(Mono.error(new EmptyResponseException(Map.of(GlobalConstants.SHIPCLASS_CAT, GlobalConstants.EX_EMPTYRESPONSE_DESC))))		
+		.transform(this::addLogginOptions)
+		.then();
 			
 	}
 
@@ -133,10 +160,20 @@ public class ShipclassProjectorAdapter implements BaseProjectorPort, ExtendedPro
 	    		);
 	}
 
-	private void logInfo(String action, String entityInfo) {
+	private <T> Mono<T> addLogginOptions(Mono<T> reactiveFlow){
 		
-	    loggerUtil.logInfoAction(this.getClass().getSimpleName(), action, entityInfo);
-	    
+		return reactiveFlow
+				.doOnSuccess( success -> loggerUtil.logInfoAction( this.getClass().getSimpleName(), GlobalConstants.MSG_FLOW_OK, success instanceof Number? GlobalConstants.MSG_MODLINES + success.toString():success.toString() ) )
+		        .doOnError( error -> loggerUtil.logInfoAction( this.getClass().getSimpleName(), GlobalConstants.MSG_FLOW_ERROR, error.toString() ) )
+		        .doFinally( signal -> loggerUtil.logInfoAction( this.getClass().getSimpleName(), GlobalConstants.MSG_FLOW_RESULT, signal.toString() ) );		
+			
+	}	
+
+	private <T> Mono<T> logFlowStep(Mono<T> reactiveFlow){
+		
+		return reactiveFlow		
+				.doOnNext( data -> loggerUtil.logInfoAction( this.getClass().getSimpleName(), GlobalConstants.MSG_FLOW_PROCESS, data.toString() ) );	
+			
 	}
 	
 }
