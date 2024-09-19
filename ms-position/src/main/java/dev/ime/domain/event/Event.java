@@ -10,7 +10,7 @@ import java.util.UUID;
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonProperty;
 
-public class Event {
+public final class Event {
 
 	private final UUID eventId;
 	private final String eventCategory;
