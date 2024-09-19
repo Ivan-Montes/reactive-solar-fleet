@@ -36,7 +36,8 @@ public class ErrorHandler{
 				InvalidUUIDException.class, this::handleBasicExceptionExtendedClasses,
 				ResourceNotFoundException.class, this::handleBasicExceptionExtendedClasses,
 				EmptyResponseException.class, this::handleBasicExceptionExtendedClasses,
-				CreateJpaEntityException.class, this::handleBasicExceptionExtendedClasses
+				CreateJpaEntityException.class, this::handleBasicExceptionExtendedClasses,
+				CreateRedisEntityException.class, this::handleBasicExceptionExtendedClasses
 				);		
 	 }	 
 	
