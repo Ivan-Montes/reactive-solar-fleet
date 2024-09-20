@@ -1,11 +1,15 @@
 package dev.ime.infrastructure.adapter;
 
+import java.util.Map;
+import java.util.Optional;
 import java.util.UUID;
 
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.data.redis.core.ReactiveRedisTemplate;
 import org.springframework.stereotype.Repository;
 
+import dev.ime.application.exception.CreateRedisEntityException;
+import dev.ime.application.exception.EmptyResponseException;
 import dev.ime.config.GlobalConstants;
 import dev.ime.config.LoggerUtil;
 import dev.ime.domain.event.Event;
@@ -27,37 +31,58 @@ public class SpacecraftRedisProjectorAdapter implements BaseProjectorPort{
 	}
 
 	@Override
-	public void create(Event event) {
+	public Mono<Void> create(Event event) {
 		
-		Mono.justOrEmpty(createEntity(event))
-		.flatMap( entity -> reactiveRedisTemplate.opsForValue().set( generateKey(entity.getSpacecraftId() ), entity))
-		.transform(this::addLogginOptions)
-		.onErrorResume( e -> Mono.fromRunnable( () -> loggerUtil.logSevereAction(e.getMessage())))
-		.subscribe();
-		
+		return Mono.justOrEmpty(event.getEventData())
+				.transform(this::logFlowStep)
+				.flatMap(this::createEntity)		        
+				.transform(this::logFlowStep)
+				.flatMap( entity -> reactiveRedisTemplate.opsForValue().set( generateKey(entity.getSpacecraftId() ), entity))
+				.switchIfEmpty(Mono.error(new EmptyResponseException(Map.of(GlobalConstants.SPACECRAFT_CAT, GlobalConstants.EX_EMPTYRESPONSE_DESC))))
+				.transform(this::addLogginOptions)
+				.then();	
 	}
 	
 	@Override
-	public void deleteById(Event event) {
+	public Mono<Void> deleteById(Event event) {
 		
-		Mono.justOrEmpty(event.getEventData().get(GlobalConstants.SPACECRAFT_ID))
-		.switchIfEmpty(Mono.error(new IllegalArgumentException(GlobalConstants.SPACECRAFT_ID + GlobalConstants.MSG_REQUIRED)))
-		.cast(String.class)
-		.map(UUID::fromString)
-		.flatMap( id -> reactiveRedisTemplate.opsForValue().delete( generateKey(id) ))
-		.transform(this::addLogginOptions)
-		.onErrorResume( e -> Mono.fromRunnable( () -> loggerUtil.logSevereAction(e.getMessage()) ))
-		.subscribe();
+		return Mono.justOrEmpty(event.getEventData())
+				.transform(this::logFlowStep)
+				.map( evenData -> evenData.get(GlobalConstants.SPACECRAFT_ID))
+				.cast(String.class)
+				.map(UUID::fromString)			        
+				.transform(this::logFlowStep)
+				.flatMap( id -> reactiveRedisTemplate.opsForValue().delete( generateKey(id) ))
+				.switchIfEmpty(Mono.error(new EmptyResponseException(Map.of(GlobalConstants.SPACECRAFT_CAT, GlobalConstants.EX_EMPTYRESPONSE_DESC))))
+				.transform(this::addLogginOptions)
+				.then();
 		
 	}	
 	
-	private SpacecraftRedisEntity createEntity(Event event) {
+	private Mono<SpacecraftRedisEntity> createEntity(Map<String, Object> eventData) {
 		
-		UUID spacecraftId = UUID.fromString( String.valueOf( event.getEventData().get(GlobalConstants.SPACECRAFT_ID) ) );
-		UUID shipclassId = UUID.fromString( String.valueOf( event.getEventData().get(GlobalConstants.SHIPCLASS_ID) ) );
+		return Mono.fromCallable( () -> {
+			
+			UUID spacecraftId = extractUuid(eventData, GlobalConstants.SPACECRAFT_ID);
+			UUID shipclassId = extractUuid(eventData, GlobalConstants.SHIPCLASS_ID);
 
-		return new SpacecraftRedisEntity(spacecraftId, shipclassId);
+	        if (spacecraftId == null || shipclassId == null ) {
+	            throw new IllegalArgumentException(GlobalConstants.EX_ILLEGALARGUMENT_DESC);
+	        }
+	        
+			return new SpacecraftRedisEntity(spacecraftId, shipclassId);
+			
+		}).onErrorMap(e -> new CreateRedisEntityException(Map.of( GlobalConstants.SPACECRAFT_CAT, e.getMessage() )));	
 		
+	}
+
+	private UUID extractUuid(Map<String, Object> eventData, String key) {
+		
+	    return Optional.ofNullable(eventData.get(key))
+	                   .map(Object::toString)
+	                   .map(UUID::fromString)
+	                   .orElse(null);
+	    
 	}
 	
 	private String generateKey(UUID id) {
@@ -67,12 +92,19 @@ public class SpacecraftRedisProjectorAdapter implements BaseProjectorPort{
 	}
 	
 	private <T> Mono<T> addLogginOptions(Mono<T> reactiveFlow){
-	
+		
+		return reactiveFlow
+				.doOnSuccess( success -> loggerUtil.logInfoAction( this.getClass().getSimpleName(), GlobalConstants.MSG_FLOW_OK, success instanceof Number? GlobalConstants.MSG_MODLINES + success.toString():success.toString() ) )
+		        .doOnError( error -> loggerUtil.logInfoAction( this.getClass().getSimpleName(), GlobalConstants.MSG_FLOW_ERROR, error.toString() ) )
+		        .doFinally( signal -> loggerUtil.logInfoAction( this.getClass().getSimpleName(), GlobalConstants.MSG_FLOW_RESULT, signal.toString() ) );		
+			
+	}	
+
+	private <T> Mono<T> logFlowStep(Mono<T> reactiveFlow){
+		
 		return reactiveFlow		
-				.doOnSuccess(o -> loggerUtil.logInfoAction(this.getClass().getSimpleName(), GlobalConstants.MSG_FLOW_OK,  o.toString()))
-		        .doOnError(e -> loggerUtil.logInfoAction(this.getClass().getSimpleName(), GlobalConstants.MSG_FLOW_ERROR, e.toString()))
-		        .doFinally(signalType -> loggerUtil.logInfoAction(this.getClass().getSimpleName(), GlobalConstants.MSG_FLOW_RESULT, signalType.toString()));		
-	
+				.doOnNext( data -> loggerUtil.logInfoAction( this.getClass().getSimpleName(), GlobalConstants.MSG_FLOW_PROCESS, data.toString() ) );	
+			
 	}
 	
 }
