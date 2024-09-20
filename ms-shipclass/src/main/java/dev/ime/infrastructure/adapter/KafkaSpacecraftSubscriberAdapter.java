@@ -79,7 +79,7 @@ public class KafkaSpacecraftSubscriberAdapter implements SubscriberPort{
     	return Mono.justOrEmpty(consumer.topic())
     	.map(actionsMap::get)
 		.switchIfEmpty(Mono.error(new IllegalArgumentException(this.getClass().getSimpleName() + GlobalConstants.MSG_HANDLER_NONE)))
-    	.flatMap( handle -> handle.apply( consumer.value() ) )
+		.flatMap( function -> function.apply(consumer.value()))
     	.then();
     	
     }
