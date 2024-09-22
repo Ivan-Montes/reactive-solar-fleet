@@ -9,7 +9,6 @@ import org.springframework.validation.Errors;
 import org.springframework.validation.FieldError;
 import org.springframework.validation.Validator;
 
-import dev.ime.application.dto.PositionDto;
 import dev.ime.application.exception.ValidationException;
 import reactor.core.publisher.Mono;
 
@@ -22,8 +21,8 @@ public class DtoValidator {
 		super();
 		this.validator = validator;
 	}
-	
-	public Mono<PositionDto> validateDto(PositionDto dto) {
+
+	public <T> Mono<T> validateDto(T dto) {
 		
 	    Errors errors = new BeanPropertyBindingResult(dto, dto.getClass().getSimpleName());
 	    validator.validate(dto, errors);
@@ -57,4 +56,3 @@ public class DtoValidator {
 	}
 	
 }
-
