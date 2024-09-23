@@ -2,6 +2,7 @@ package dev.ime.infrastructure.adapter;
 
 import java.util.UUID;
 
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Repository;
 
 import dev.ime.config.PositionMapper;
@@ -24,10 +25,10 @@ public class PositionReadRepositoryAdapter implements ReadRepositoryPort<Positio
 	}
 
 	@Override
-	public Flux<Position> findAll() {
+	public Flux<Position> findAll(Pageable pageable) {
 		
 		return positionReadRepository
-		.findAll()
+		.findAllBy(pageable)
 		.map(mapper::fromJpaToDomain);
 		
 	}
