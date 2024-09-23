@@ -2,6 +2,7 @@ package dev.ime.application.handler;
 
 import org.springframework.stereotype.Component;
 
+import dev.ime.application.usecase.GetAllPositionQuery;
 import dev.ime.domain.model.Position;
 import dev.ime.domain.port.outbound.ReadRepositoryPort;
 import dev.ime.domain.query.Query;
@@ -21,7 +22,9 @@ public class GetAllPositionQueryHandler implements QueryHandler<Flux<Position>>{
 	@Override
 	public Flux<Position> handle(Query query) {
 		
-		return readRepository.findAll();
+		GetAllPositionQuery getAllQuery = (GetAllPositionQuery)query;
+		
+		return readRepository.findAll(getAllQuery.pageable());
 		
 	}
 
