@@ -58,8 +58,8 @@ logging:
   level:
     org:
       springframework:
-        data: DEBUG
+        #data: DEBUG
     io:
-      r2dbc: DEBUG
+      #r2dbc: DEBUG
 
           
