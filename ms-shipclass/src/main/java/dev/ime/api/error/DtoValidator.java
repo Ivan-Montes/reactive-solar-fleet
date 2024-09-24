@@ -9,7 +9,6 @@ import org.springframework.validation.Errors;
 import org.springframework.validation.FieldError;
 import org.springframework.validation.Validator;
 
-import dev.ime.application.dto.ShipclassDto;
 import dev.ime.application.exception.ValidationException;
 import reactor.core.publisher.Mono;
 
@@ -23,7 +22,7 @@ public class DtoValidator {
 		this.validator = validator;
 	}
 	
-	public Mono<ShipclassDto> validateDto(ShipclassDto dto) {
+public <T> Mono<T> validateDto(T dto) {
 		
 	    Errors errors = new BeanPropertyBindingResult(dto, dto.getClass().getSimpleName());
 	    validator.validate(dto, errors);
