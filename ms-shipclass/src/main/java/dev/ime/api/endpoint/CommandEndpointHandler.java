@@ -35,6 +35,7 @@ public class CommandEndpointHandler implements CommandEndpointPort{
 
 	public CommandEndpointHandler(CommandServicePort<ShipclassDto> commandService, DtoValidator positionValidator,
 			ErrorHandler errorHandler) {
+		super();
 		this.commandService = commandService;
 		this.dtoValidator = positionValidator;
 		this.errorHandler = errorHandler;
