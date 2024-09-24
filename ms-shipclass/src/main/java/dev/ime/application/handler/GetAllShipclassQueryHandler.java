@@ -2,6 +2,7 @@ package dev.ime.application.handler;
 
 import org.springframework.stereotype.Component;
 
+import dev.ime.application.usecase.GetAllShipclassQuery;
 import dev.ime.domain.model.Shipclass;
 import dev.ime.domain.port.outbound.ReadRepositoryPort;
 import dev.ime.domain.query.Query;
@@ -21,7 +22,8 @@ public class GetAllShipclassQueryHandler implements QueryHandler<Flux<Shipclass>
 	@Override
 	public Flux<Shipclass> handle(Query query) {
 		
-		return readRepository.findAll();
+		GetAllShipclassQuery getAllQuery = (GetAllShipclassQuery)query;
+		return readRepository.findAll(getAllQuery.pageable());
 		
 	}
 	
