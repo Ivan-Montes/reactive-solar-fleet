@@ -2,6 +2,7 @@ package dev.ime.infrastructure.adapter;
 
 import java.util.UUID;
 
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Repository;
 
 import dev.ime.config.ShipclassMapper;
@@ -24,10 +25,10 @@ public class ShipclassReadRepositoryAdapter implements ReadRepositoryPort<Shipcl
 	}
 
 	@Override
-	public Flux<Shipclass> findAll() {
+	public Flux<Shipclass> findAll(Pageable pageable) {
 
 		return shipclassReadRepository
-		.findAll()
+		.findAllBy(pageable)
 		.map(mapper::fromJpaToDomain);
 	}
 
