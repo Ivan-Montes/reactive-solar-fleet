@@ -7,7 +7,7 @@ public class GlobalConstants {
 	}
 	
 	//Patterns
-	public static final String PATTERN_NAME_FULL = "^[a-zA-Z0-9ñÑáéíóúÁÉÍÓÚ]+[a-zA-Z0-9ñÑáéíóúÁÉÍÓÚ\\s\\-\\.&,:]{1,50}";	
+	public static final String PATTERN_NAME_FULL = "^[a-zA-Z0-9ñÑáéíóúÁÉÍÓÚ][a-zA-Z0-9ñÑáéíóúÁÉÍÓÚ\\s\\-\\.&,:]{1,49}$";		
 	public static final String PATTERN_UUID_ZERO = "00000000-0000-0000-0000-000000000000";
 	//Messages
 	public static final String MSG_REQUIRED = " *REQUIRED* ";
@@ -28,7 +28,9 @@ public class GlobalConstants {
 	public static final String MSG_FLOW_PROCESS = "Processing reactive flow";
 	public static final String MSG_PUBLISH_EVENT = "Publishing Event";	
 	public static final String MSG_PUBLISH_OK = "Publish Event Succesfully";	
-	public static final String MSG_PUBLISH_FAIL = "Publish Event Failed";	
+	public static final String MSG_PUBLISH_FAIL = "Publish Event Failed";		
+	public static final String MSG_PAGED_FAIL = "Invalid page or size parameter";			
+	public static final String MSG_REQUEST_FAIL = "Error processing request";	
 	//Models
 	public static final String POSITION_CAT = "Position";
 	public static final String POSITION_DB = "positions";
@@ -70,9 +72,9 @@ public class GlobalConstants {
 	public static final String SPACECRAFT_CREATED = "spacecraft.created";
 	public static final String SPACECRAFT_UPDATED = "spacecraft.updated";
 	public static final String SPACECRAFT_DELETED = "spacecraft.deleted";
-	public static final String CREWMEMBER_CREATED = "crew.created";
-	public static final String CREWMEMBER_UPDATED = "crew.updated";
-	public static final String CREWMEMBER_DELETED = "crew.deleted";	
+	public static final String CREWMEMBER_CREATED = "crewmember.created";
+	public static final String CREWMEMBER_UPDATED = "crewmember.updated";
+	public static final String CREWMEMBER_DELETED = "crewmember.deleted";	
 	//Exceptions
 	public static final String EX_RESOURCENOTFOUND = "ResourceNotFoundException";	
 	public static final String EX_RESOURCENOTFOUND_DESC = "Exception is coming, the resource has not been found.";	
@@ -92,6 +94,16 @@ public class GlobalConstants {
 	public static final String EX_PLAIN_DESC = "Exception because the night is dark and full of terrors";
 	public static final String EX_EMPTYRESPONSE = "EmptyResponseException";
 	public static final String EX_EMPTYRESPONSE_DESC = "No freak out, just an Empty Response";
-	
+	public static final String EX_CREATEJPAENTITY = "CreateJpaEntityException";
+	public static final String EX_CREATEJPAENTITY_DESC = "Exception while creation a JPA entity for saving to sql db";
+	public static final String EX_CREATEREDISENTITY = "CreateRedisEntityException";
+	public static final String EX_CREATEREDISENTITY_DESC = "Exception while creation a REDIS entity for saving to db";
+	//Paging and Sorting
+	public static final String PS_PAGE = "page";
+	public static final String PS_SIZE = "size";
+	public static final String PS_BY = "sortBy";
+	public static final String PS_DIR = "sortDir";
+	public static final String PS_A = "ASC";
+	public static final String PS_D = "DESC";	
 	
 }
