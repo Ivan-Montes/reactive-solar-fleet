@@ -98,6 +98,8 @@ public class GlobalConstants {
 	public static final String EX_CREATEJPAENTITY_DESC = "Exception while creation a JPA entity for saving to sql db";
 	public static final String EX_CREATEREDISENTITY = "CreateRedisEntityException";
 	public static final String EX_CREATEREDISENTITY_DESC = "Exception while creation a REDIS entity for saving to db";
+	public static final String EX_PUBLISHEVENT = "PublishEventException";
+	public static final String EX_PUBLISHEVENT_DESC = "Failed to publish event";
 	//Paging and Sorting
 	public static final String PS_PAGE = "page";
 	public static final String PS_SIZE = "size";
