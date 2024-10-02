@@ -1,11 +1,14 @@
 package dev.ime.infrastructure.adapter;
 
 
+import java.util.Map;
+
 import org.apache.kafka.clients.producer.ProducerRecord;
 import org.springframework.kafka.core.KafkaTemplate;
 import org.springframework.kafka.support.SendResult;
 import org.springframework.stereotype.Service;
 
+import dev.ime.application.exception.PublishEventException;
 import dev.ime.config.GlobalConstants;
 import dev.ime.config.LoggerUtil;
 import dev.ime.domain.event.Event;
@@ -31,7 +34,10 @@ public class KafkaPublisherAdapter implements PublisherPort{
 	    logInfo(GlobalConstants.MSG_PUBLISH_EVENT, event.toString());
 	    return Mono.fromFuture(kafkaTemplate.send(new ProducerRecord<>(event.getEventType(), event)))
 	               .doOnSuccess(this::handleSuccess)
-	               .doOnError(this::handleFailure)
+	               .onErrorResume(ex -> {
+	            	   handleFailure(ex);
+	                   return Mono.error(new PublishEventException(Map.of(GlobalConstants.MSG_PUBLISH_FAIL, ex.getMessage())));
+	               })
 	               .then();
 	    
 	}
