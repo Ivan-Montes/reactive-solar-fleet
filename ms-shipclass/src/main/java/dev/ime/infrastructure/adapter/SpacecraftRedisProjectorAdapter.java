@@ -66,10 +66,6 @@ public class SpacecraftRedisProjectorAdapter implements BaseProjectorPort{
 			UUID spacecraftId = extractUuid(eventData, GlobalConstants.SPACECRAFT_ID);
 			UUID shipclassId = extractUuid(eventData, GlobalConstants.SHIPCLASS_ID);
 
-	        if (spacecraftId == null || shipclassId == null ) {
-	            throw new IllegalArgumentException(GlobalConstants.EX_ILLEGALARGUMENT_DESC);
-	        }
-	        
 			return new SpacecraftRedisEntity(spacecraftId, shipclassId);
 			
 		}).onErrorMap(e -> new CreateRedisEntityException(Map.of( GlobalConstants.SPACECRAFT_CAT, e.getMessage() )));	
@@ -81,7 +77,7 @@ public class SpacecraftRedisProjectorAdapter implements BaseProjectorPort{
 	    return Optional.ofNullable(eventData.get(key))
 	                   .map(Object::toString)
 	                   .map(UUID::fromString)
-	                   .orElse(null);
+	                   .orElseThrow(() -> new IllegalArgumentException(GlobalConstants.EX_ILLEGALARGUMENT_DESC + ": " + key));
 	    
 	}
 	
