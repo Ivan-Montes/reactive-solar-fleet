@@ -62,4 +62,29 @@ logging:
     io:
       #r2dbc: DEBUG
 
+# Enable /actuator/info
+management:
+  info:
+    env:
+      enabled: true
+  endpoints:
+    web:
+      exposure:
+        include: info, health, metrics
+ 
+  endpoint:
+    health:
+      probes:
+        enabled: true        
+  health:
+    livenessState:
+      enabled: true
+    readinessState:
+      enabled: true  
+             
+# Basic data for /actuator/info
+info:
+  app:
+    name: ${spring.application.name}
+    version: 1.0.0
           
