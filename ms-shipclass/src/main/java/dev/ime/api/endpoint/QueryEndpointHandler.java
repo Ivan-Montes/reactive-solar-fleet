@@ -9,8 +9,8 @@ import org.springframework.stereotype.Component;
 import org.springframework.web.reactive.function.server.ServerRequest;
 import org.springframework.web.reactive.function.server.ServerResponse;
 
-import dev.ime.api.error.DtoValidator;
 import dev.ime.api.error.ErrorHandler;
+import dev.ime.api.validation.DtoValidator;
 import dev.ime.application.dto.PaginationDto;
 import dev.ime.application.dto.ShipclassDto;
 import dev.ime.application.exception.EmptyResponseException;
