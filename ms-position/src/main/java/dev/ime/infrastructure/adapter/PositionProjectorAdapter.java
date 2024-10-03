@@ -43,6 +43,7 @@ public class PositionProjectorAdapter implements BaseProjectorPort, ExtendedProj
 			.transform(this::logFlowStep)
 			.flatMap(this::createJpaEntity)		        
 			.transform(this::logFlowStep)
+			.flatMap(this::validateNameAlreadyUsed)
 			.flatMap(this::insertQuery)
 			.switchIfEmpty(Mono.error(new EmptyResponseException(Map.of(GlobalConstants.POSITION_CAT, GlobalConstants.EX_EMPTYRESPONSE_DESC))))
 			.transform(this::addLogginOptions)
@@ -80,7 +81,7 @@ public class PositionProjectorAdapter implements BaseProjectorPort, ExtendedProj
 	    return Optional.ofNullable(eventData.get(key))
 	                   .map(Object::toString)
 	                   .map(UUID::fromString)
-	                   .orElse(null);
+	                   .orElseThrow(() -> new IllegalArgumentException(GlobalConstants.EX_ILLEGALARGUMENT_DESC + ": " + key));
 	    
 	}
 
