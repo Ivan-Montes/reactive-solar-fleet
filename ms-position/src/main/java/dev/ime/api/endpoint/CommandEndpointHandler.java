@@ -9,7 +9,7 @@ import org.springframework.web.reactive.function.server.ServerRequest;
 import org.springframework.web.reactive.function.server.ServerResponse;
 
 import dev.ime.api.error.ErrorHandler;
-import dev.ime.api.error.DtoValidator;
+import dev.ime.api.validation.DtoValidator;
 import dev.ime.application.dto.PositionDto;
 import dev.ime.application.exception.EmptyResponseException;
 import dev.ime.application.exception.InvalidUUIDException;
