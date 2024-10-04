@@ -1,4 +1,4 @@
-package dev.ime.api.error;
+package dev.ime.api.validation;
 
 import java.util.HashMap;
 import java.util.Map;
