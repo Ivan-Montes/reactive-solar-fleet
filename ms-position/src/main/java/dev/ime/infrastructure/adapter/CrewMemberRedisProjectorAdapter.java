@@ -67,10 +67,6 @@ public class CrewMemberRedisProjectorAdapter implements BaseProjectorPort{
 			
 			UUID crewMemberId = extractUuid(eventData, GlobalConstants.CREWMEMBER_ID);
 			UUID positionId = extractUuid(eventData, GlobalConstants.POSITION_ID);
-
-	        if (crewMemberId == null || positionId == null ) {
-	            throw new IllegalArgumentException(GlobalConstants.EX_ILLEGALARGUMENT_DESC);
-	        }
 	        
 			return new CrewMemberRedisEntity(crewMemberId, positionId);
 			
@@ -83,7 +79,7 @@ public class CrewMemberRedisProjectorAdapter implements BaseProjectorPort{
 	    return Optional.ofNullable(eventData.get(key))
 	                   .map(Object::toString)
 	                   .map(UUID::fromString)
-	                   .orElse(null);
+	                   .orElseThrow(() -> new IllegalArgumentException(GlobalConstants.EX_ILLEGALARGUMENT_DESC + ": " + key));
 	    
 	}
 	
