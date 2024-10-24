@@ -33,6 +33,7 @@ public class GlobalConstants {
 	public static final String MSG_REQUEST_FAIL = "Error processing request";	
 	//Models
 	public static final String POSITION_CAT = "Position";
+	public static final String POSITION_CAT_INDEX = "index:position:";
 	public static final String POSITION_DB = "positions";
 	public static final String POSITION_ID = "positionId";
 	public static final String POSITION_ID_DB = "position_id";
@@ -49,6 +50,7 @@ public class GlobalConstants {
 	public static final String SHIPCLASS_DESC = "shipclassDescription";
 	public static final String SHIPCLASS_DESC_DB = "shipclass_description";
 	public static final String SPACECRAFT_CAT = "Spacecraft";
+	public static final String SPACECRAFT_CAT_INDEX = "index:spacecraft:";
 	public static final String SPACECRAFT_DB = "spacecrafts";
 	public static final String SPACECRAFT_ID = "spacecraftId";
 	public static final String SPACECRAFT_ID_DB = "spacecraft_id";
@@ -98,6 +100,8 @@ public class GlobalConstants {
 	public static final String EX_CREATEJPAENTITY_DESC = "Exception while creation a JPA entity for saving to sql db";
 	public static final String EX_CREATEREDISENTITY = "CreateRedisEntityException";
 	public static final String EX_CREATEREDISENTITY_DESC = "Exception while creation a REDIS entity for saving to db";
+	public static final String EX_PUBLISHEVENT = "PublishEventException";
+	public static final String EX_PUBLISHEVENT_DESC = "Failed to publish event";
 	//Paging and Sorting
 	public static final String PS_PAGE = "page";
 	public static final String PS_SIZE = "size";

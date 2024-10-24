@@ -5,7 +5,7 @@ public class GlobalConstants {
 	private GlobalConstants() {
 		super();
 	}
-
+	
 	//Patterns
 	public static final String PATTERN_NAME_FULL = "^[a-zA-Z0-9ñÑáéíóúÁÉÍÓÚ][a-zA-Z0-9ñÑáéíóúÁÉÍÓÚ\\s\\-\\.&,:]{1,49}$";	
 	public static final String PATTERN_UUID_ZERO = "00000000-0000-0000-0000-000000000000";
@@ -28,9 +28,9 @@ public class GlobalConstants {
 	public static final String MSG_FLOW_PROCESS = "Processing reactive flow";
 	public static final String MSG_PUBLISH_EVENT = "Publishing Event";	
 	public static final String MSG_PUBLISH_OK = "Publish Event Succesfully";	
-	public static final String MSG_PUBLISH_FAIL = "Publish Event Failed";		
+	public static final String MSG_PUBLISH_FAIL = "Publish Event Failed";			
 	public static final String MSG_PAGED_FAIL = "Invalid page or size parameter";			
-	public static final String MSG_REQUEST_FAIL = "Error processing request";		
+	public static final String MSG_REQUEST_FAIL = "Error processing request";	
 	//Models
 	public static final String POSITION_CAT = "Position";
 	public static final String POSITION_CAT_INDEX = "index:position:";
