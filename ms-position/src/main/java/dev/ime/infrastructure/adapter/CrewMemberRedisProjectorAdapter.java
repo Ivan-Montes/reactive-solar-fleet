@@ -16,6 +16,7 @@ import dev.ime.domain.event.Event;
 import dev.ime.domain.port.outbound.BaseProjectorPort;
 import dev.ime.infrastructure.entity.CrewMemberRedisEntity;
 import reactor.core.publisher.Mono;
+import reactor.util.function.Tuple2;
 
 @Repository
 @Qualifier("crewMemberRedisProjectorAdapter")
@@ -23,25 +24,29 @@ public class CrewMemberRedisProjectorAdapter implements BaseProjectorPort{
 
 	private final LoggerUtil loggerUtil;
     private final ReactiveRedisTemplate<String, CrewMemberRedisEntity> reactiveRedisTemplate;
+    private final ReactiveRedisTemplate<String, String> stringReactiveRedisTemplate;
 	
-    public CrewMemberRedisProjectorAdapter(LoggerUtil loggerUtil,
-			ReactiveRedisTemplate<String, CrewMemberRedisEntity> reactiveRedisTemplate) {
+	public CrewMemberRedisProjectorAdapter(LoggerUtil loggerUtil,
+			ReactiveRedisTemplate<String, CrewMemberRedisEntity> reactiveRedisTemplate,
+			ReactiveRedisTemplate<String, String> stringReactiveRedisTemplate) {
 		super();
 		this.loggerUtil = loggerUtil;
 		this.reactiveRedisTemplate = reactiveRedisTemplate;
+		this.stringReactiveRedisTemplate = stringReactiveRedisTemplate;
 	}
-    
+
 	@Override
 	public Mono<Void> create(Event event) {
 
 		return Mono.justOrEmpty(event.getEventData())
-				.transform(this::logFlowStep)
-				.flatMap(this::createEntity)		        
-				.transform(this::logFlowStep)
-				.flatMap( entity -> reactiveRedisTemplate.opsForValue().set( generateKey(entity.getCrewMemberId() ), entity))
-				.switchIfEmpty(Mono.error(new EmptyResponseException(Map.of(GlobalConstants.CREWMEMBER_CAT, GlobalConstants.EX_EMPTYRESPONSE_DESC))))
-				.transform(this::addLogginOptions)
-				.then();
+                .transform(this::logFlowStep)
+                .flatMap(this::createEntity)        
+                .transform(this::logFlowStep)
+                .flatMap(this::deleteFromIndexIfOperationIsUpdate)
+                .flatMap(this::insertIntoRedis)
+                .switchIfEmpty(Mono.error(new EmptyResponseException(Map.of(GlobalConstants.CREWMEMBER_CAT, GlobalConstants.EX_EMPTYRESPONSE_DESC))))
+                .transform(this::addLogginOptions)
+                .then();
 		
 	}
 	
@@ -51,10 +56,12 @@ public class CrewMemberRedisProjectorAdapter implements BaseProjectorPort{
 		return Mono.justOrEmpty(event.getEventData())
 				.transform(this::logFlowStep)
 				.map( evenData -> evenData.get(GlobalConstants.CREWMEMBER_ID))
+				.switchIfEmpty(Mono.error(new IllegalArgumentException(GlobalConstants.CREWMEMBER_ID + GlobalConstants.MSG_REQUIRED)))
 				.cast(String.class)
 				.map(UUID::fromString)			        
 				.transform(this::logFlowStep)
-				.flatMap( id -> reactiveRedisTemplate.opsForValue().delete( generateKey(id) ))	
+				.flatMap(this::deleteFromIndex)
+				.flatMap( id -> reactiveRedisTemplate.opsForValue().delete( generateCrewMemberKey(id) ))	
 				.switchIfEmpty(Mono.error(new EmptyResponseException(Map.of(GlobalConstants.CREWMEMBER_CAT, GlobalConstants.EX_EMPTYRESPONSE_DESC))))
 				.transform(this::addLogginOptions)
 				.then();
@@ -83,10 +90,63 @@ public class CrewMemberRedisProjectorAdapter implements BaseProjectorPort{
 	    
 	}
 	
-	private String generateKey(UUID id) {
+	private String generateCrewMemberKey(UUID id) {
 		
 	    return GlobalConstants.CREWMEMBER_CAT  + ":" + id.toString();
 	    
+	}
+
+	private String generatePositionIndexKey(UUID id) {
+		
+	    return GlobalConstants.POSITION_CAT_INDEX + id.toString();
+	    
+	}
+
+	private Mono<CrewMemberRedisEntity> deleteFromIndexIfOperationIsUpdate(CrewMemberRedisEntity entity) {
+		
+	    String key = generateCrewMemberKey(entity.getCrewMemberId());
+	    
+		return reactiveRedisTemplate
+			.hasKey(key)
+	        .filter(Boolean::booleanValue)
+	        .flatMap(exists -> reactiveRedisTemplate.opsForValue().get(key))
+			.ofType(CrewMemberRedisEntity.class)
+			.flatMap(crewMemberFound -> {
+	            String oldIndexKey = generatePositionIndexKey(crewMemberFound.getPositionId());
+	            return stringReactiveRedisTemplate.opsForSet().remove(oldIndexKey, entity.getCrewMemberId().toString());
+	        })
+			.then(Mono.just(entity))
+	        .defaultIfEmpty(entity);
+		
+	}
+
+	private Mono<Tuple2<Boolean, Long>> insertIntoRedis(CrewMemberRedisEntity entity) {
+		
+	    String key = generateCrewMemberKey(entity.getCrewMemberId());
+	    String indexKey = generatePositionIndexKey(entity.getPositionId());
+	    
+	    return Mono.zip(
+	    		reactiveRedisTemplate.opsForValue().set(key, entity),
+	    		stringReactiveRedisTemplate.opsForSet().add(indexKey, entity.getCrewMemberId().toString())
+	    );
+	    
+	}
+
+	private Mono<UUID> deleteFromIndex(UUID id) {
+		
+	    String key = generateCrewMemberKey(id);
+
+		return reactiveRedisTemplate
+				.hasKey(key)
+		        .filter(Boolean::booleanValue)
+		        .flatMap(exists -> reactiveRedisTemplate.opsForValue().get(key))
+				.ofType(CrewMemberRedisEntity.class)
+				.flatMap(crewMemberFound -> {
+		            String oldIndexKey = generatePositionIndexKey(crewMemberFound.getPositionId());
+		            return stringReactiveRedisTemplate.opsForSet().remove(oldIndexKey, id.toString());
+		        })
+				.then(Mono.just(id))
+		        .defaultIfEmpty(id);		
 	}
 	
 	private <T> Mono<T> addLogginOptions(Mono<T> reactiveFlow){
