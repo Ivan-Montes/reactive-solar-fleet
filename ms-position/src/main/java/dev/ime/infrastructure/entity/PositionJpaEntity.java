@@ -6,6 +6,7 @@ import org.springframework.data.annotation.Id;
 import org.springframework.data.relational.core.mapping.Column;
 import org.springframework.data.relational.core.mapping.Table;
 
+import dev.ime.config.GlobalConstants;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
@@ -14,7 +15,7 @@ import lombok.Setter;
 import lombok.ToString;
 
 
-@Table(name = "positions")
+@Table(name = GlobalConstants.POSITION_DB)
 @NoArgsConstructor
 @AllArgsConstructor
 @Getter
@@ -24,13 +25,13 @@ import lombok.ToString;
 public class PositionJpaEntity {
 
 	@Id
-	@Column( value = "position_id" )
+	@Column( value = GlobalConstants.POSITION_ID_DB )
 	private UUID positionId;
 	
-	@Column( value = "position_name" )
+	@Column( value = GlobalConstants.POSITION_NAME_DB )
 	private String positionName;
 	
-	@Column( value = "position_description" )
+	@Column( value = GlobalConstants.POSITION_DESC_DB )
 	private String positionDescription;
 	
 }
