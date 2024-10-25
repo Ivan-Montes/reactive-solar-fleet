@@ -44,14 +44,21 @@ spring:
            json:
              trusted:
                packages: '*' 
-                 
+ 
+# JWT Server conf for client
+  security:
+    oauth2:
+      resourceserver:
+        jwt:
+          issuer-uri: http://localhost:9000
+                       
 server:
   port: ${SERVER_PORT:8081}
   
+# Custom properties  
 properties:
   uri:
-    endpointUri: "/api/v1/positions"
-    
+    endpointUri: "/api/v1/positions"    
 
 # Logging para Spring Data y r2dbc
 logging:
