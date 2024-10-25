@@ -1,3 +1,14 @@
+
+logging:
+  level:
+    org:
+      springframework:
+        security: DEBUG     
+        data: DEBUG
+    io:
+      r2dbc: DEBUG  
+    web: DEBUG 
+    
 # Enable /actuator/
 management:
   endpoints:
