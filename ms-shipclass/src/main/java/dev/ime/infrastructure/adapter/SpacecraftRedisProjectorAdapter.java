@@ -37,7 +37,7 @@ public class SpacecraftRedisProjectorAdapter implements BaseProjectorPort{
 				.transform(this::logFlowStep)
 				.flatMap(this::createEntity)		        
 				.transform(this::logFlowStep)
-				.flatMap( entity -> reactiveRedisTemplate.opsForValue().set( generateKey(entity.getSpacecraftId() ), entity))
+				.flatMap( entity -> reactiveRedisTemplate.opsForValue().set( generateSpacecraftKey(entity.getSpacecraftId() ), entity))
 				.switchIfEmpty(Mono.error(new EmptyResponseException(Map.of(GlobalConstants.SPACECRAFT_CAT, GlobalConstants.EX_EMPTYRESPONSE_DESC))))
 				.transform(this::addLogginOptions)
 				.then();	
@@ -52,7 +52,7 @@ public class SpacecraftRedisProjectorAdapter implements BaseProjectorPort{
 				.cast(String.class)
 				.map(UUID::fromString)			        
 				.transform(this::logFlowStep)
-				.flatMap( id -> reactiveRedisTemplate.opsForValue().delete( generateKey(id) ))
+				.flatMap( id -> reactiveRedisTemplate.opsForValue().delete( generateSpacecraftKey(id) ))
 				.switchIfEmpty(Mono.error(new EmptyResponseException(Map.of(GlobalConstants.SPACECRAFT_CAT, GlobalConstants.EX_EMPTYRESPONSE_DESC))))
 				.transform(this::addLogginOptions)
 				.then();
@@ -81,7 +81,7 @@ public class SpacecraftRedisProjectorAdapter implements BaseProjectorPort{
 	    
 	}
 	
-	private String generateKey(UUID id) {
+	private String generateSpacecraftKey(UUID id) {
 		
 	    return GlobalConstants.SPACECRAFT_CAT  + ":" + id.toString();
 	    
