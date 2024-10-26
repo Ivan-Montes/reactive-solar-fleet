@@ -7,7 +7,6 @@ import org.springframework.stereotype.Component;
 
 import dev.ime.config.GlobalConstants;
 import dev.ime.domain.port.outbound.RedisCheckerEntityPort;
-import dev.ime.infrastructure.entity.CrewMemberRedisEntity;
 import dev.ime.infrastructure.entity.ShipclassRedisEntity;
 import reactor.core.publisher.Mono;
 
@@ -15,16 +14,15 @@ import reactor.core.publisher.Mono;
 public class RedisCheckerEntityAdapter implements RedisCheckerEntityPort {
 
     private final ReactiveRedisTemplate<String, ShipclassRedisEntity> shipclassReactiveRedisTemplate;
-    private final ReactiveRedisTemplate<String, CrewMemberRedisEntity> crewMemberReactiveRedisTemplate;    
+    private final ReactiveRedisTemplate<String, String> stringReactiveRedisTemplate;
 
-	public RedisCheckerEntityAdapter(
-			ReactiveRedisTemplate<String, ShipclassRedisEntity> shipclassReactiveRedisTemplate,
-			ReactiveRedisTemplate<String, CrewMemberRedisEntity> crewMemberReactiveRedisTemplate) {
+	public RedisCheckerEntityAdapter(ReactiveRedisTemplate<String, ShipclassRedisEntity> shipclassReactiveRedisTemplate,
+			ReactiveRedisTemplate<String, String> stringReactiveRedisTemplate) {
 		super();
 		this.shipclassReactiveRedisTemplate = shipclassReactiveRedisTemplate;
-		this.crewMemberReactiveRedisTemplate = crewMemberReactiveRedisTemplate;
+		this.stringReactiveRedisTemplate = stringReactiveRedisTemplate;
 	}
-
+	
 	@Override
 	public Mono<Boolean> existsById(UUID id) {
 		
@@ -35,13 +33,11 @@ public class RedisCheckerEntityAdapter implements RedisCheckerEntityPort {
 	@Override
 	public Mono<Boolean> existsAnySpacecrafInCrewMember(UUID spacecraftId) {
 		
-	    return crewMemberReactiveRedisTemplate.keys(GlobalConstants.CREWMEMBER_CAT + ":*")
-	    		.flatMap(key -> crewMemberReactiveRedisTemplate.opsForValue().get(key)
-    	            .onErrorResume( e -> Mono.empty() ))
-	            .ofType(CrewMemberRedisEntity.class)
-	            .filter(entity -> entity.getSpacecraftId().equals(spacecraftId))
-	            .hasElements();
+	    String indexKey = GlobalConstants.SPACECRAFT_CAT_INDEX + spacecraftId;
+	    
+	    return stringReactiveRedisTemplate.opsForSet().size(indexKey)
+	        .map(size -> size > 0);
 	    
 	}
-	
+
 }
