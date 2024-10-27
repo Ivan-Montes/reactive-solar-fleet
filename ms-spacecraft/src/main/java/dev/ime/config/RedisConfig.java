@@ -44,4 +44,16 @@ public class RedisConfig {
         
     }
     
+    @Bean
+    ReactiveRedisTemplate<String, String> stringReactiveRedisTemplate(ReactiveRedisConnectionFactory factory) {
+        RedisSerializationContext.RedisSerializationContextBuilder<String, String> builder =
+            RedisSerializationContext.newSerializationContext(RedisSerializer.string());
+
+        RedisSerializationContext<String, String> context = builder
+            .value(RedisSerializer.string())
+            .build();
+
+        return new ReactiveRedisTemplate<>(factory, context);
+    }
+
 }
