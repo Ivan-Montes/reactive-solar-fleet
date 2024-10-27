@@ -1,0 +1,26 @@
+
+spring: 
+  kafka:
+    producer:
+      bootstrap-servers: kafka:9092
+    consumer:
+      bootstrap-servers: kafka:9092 
+      
+  security:
+    oauth2:
+      resourceserver:
+        jwt:
+          issuer-uri: http://ms-oauth2:9000 
+       
+  data:
+                     
+    mongodb:
+      uri: mongodb://sa:${MONGODB_PASS_WRITE:invalidPassword}@ms-spacecraft-write-db:27017/mongo-write-db?authSource=admin
+ 
+    redis:
+      host: ms-spacecraft-redis-db
+      port: 6379 
+ 
+  r2dbc:
+    host: ms-spacecraft-read-db
+    port: 5432
