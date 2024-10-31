@@ -1,0 +1,12 @@
+
+spring: 
+  kafka:
+    producer:
+      bootstrap-servers: kafka:9092
+    consumer:
+      bootstrap-servers: kafka:9092 
+
+properties:
+  authorization:
+    server:
+      issuer: http://ms-oauth2:${server.port}
