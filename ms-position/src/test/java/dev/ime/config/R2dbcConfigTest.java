@@ -1,7 +1,7 @@
 package dev.ime.config;
 
 
-import org.junit.jupiter.api.Assertions;
+import org.assertj.core.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
@@ -9,7 +9,6 @@ import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.data.r2dbc.core.R2dbcEntityTemplate;
-import io.r2dbc.spi.ConnectionFactory;
 
 @ExtendWith(MockitoExtension.class)
 class R2dbcConfigTest {
@@ -30,11 +29,13 @@ class R2dbcConfigTest {
         Mockito.when(r2dbcConfigProperties.getPassword()).thenReturn("password");
         Mockito.when(r2dbcConfigProperties.getDatabase()).thenReturn("testdb");
 
-        R2dbcEntityTemplate template = r2dbcConfig.r2dbcEntityTemplate(r2dbcConfigProperties);
+        R2dbcEntityTemplate r2dbcEntityTemplate = r2dbcConfig.r2dbcEntityTemplate(r2dbcConfigProperties);
 
-        Assertions.assertNotNull(template);
-        ConnectionFactory connectionFactory = template.getDatabaseClient().getConnectionFactory();
-        Assertions.assertNotNull(connectionFactory);        
+        org.junit.jupiter.api.Assertions.assertAll( 
+				()-> Assertions.assertThat(r2dbcEntityTemplate).isNotNull(),
+				()-> Assertions.assertThat(r2dbcEntityTemplate.getDatabaseClient()).isNotNull(),
+				()-> Assertions.assertThat(r2dbcEntityTemplate.getDatabaseClient().getConnectionFactory()).isNotNull()
+				);    
       
     }
 
