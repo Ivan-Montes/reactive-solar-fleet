@@ -1,9 +1,10 @@
-version: "3.8"
+
+name:  reactive-solar-fleet-prod
 
 services:
 
   ms-position-write-db:
-    image: mongo
+    image: mongo:8.0.3-noble
     container_name: ms-position-write-db
     environment:
       MONGO_INITDB_DATABASE: mongo-write-db
@@ -21,7 +22,7 @@ services:
       retries: 3
 
   ms-position-read-db:
-    image: postgres:latest
+    image: postgres:17.1-alpine
     container_name: ms-position-read-db
     environment:
        POSTGRES_PASSWORD: ${SQLDB_PASS}
@@ -41,7 +42,7 @@ services:
       retries: 5
        
   ms-position-redis-db:
-    image: redis:latest
+    image: redis:7.4-alpine
     container_name: ms-position-redis-db
     networks:
       - reactive-solar-fleet-net
@@ -52,7 +53,7 @@ services:
       test: [ "CMD", "redis-cli", "--raw", "incr", "ping" ]
       
   ms-shipclass-write-db:
-    image: mongo
+    image: mongo:8.0.3-noble
     container_name: ms-shipclass-write-db
     environment:
       MONGO_INITDB_DATABASE: mongo-write-db
@@ -70,7 +71,7 @@ services:
       retries: 3
   
   ms-shipclass-read-db:
-    image: postgres:latest
+    image: postgres:17.1-alpine
     container_name: ms-shipclass-read-db
     environment:
        POSTGRES_PASSWORD: ${SQLDB_PASS}
@@ -90,7 +91,7 @@ services:
       retries: 5  	
       
   ms-shipclass-redis-db:
-    image: redis:latest
+    image: redis:7.4-alpine
     container_name: ms-shipclass-redis-db
     networks:
       - reactive-solar-fleet-net
@@ -101,7 +102,7 @@ services:
       test: [ "CMD", "redis-cli", "--raw", "incr", "ping" ]
       
   ms-spacecraft-write-db:
-    image: mongo
+    image: mongo:8.0.3-noble
     container_name: ms-spacecraft-write-db
     environment:
       MONGO_INITDB_DATABASE: mongo-write-db
@@ -119,7 +120,7 @@ services:
       retries: 3 
   
   ms-spacecraft-read-db:
-    image: postgres:latest
+    image: postgres:17.1-alpine
     container_name: ms-spacecraft-read-db
     environment:
        POSTGRES_PASSWORD: ${SQLDB_PASS}
@@ -139,7 +140,7 @@ services:
       retries: 5	
     
   ms-spacecraft-redis-db:
-    image: redis:latest
+    image: redis:7.4-alpine
     container_name: ms-spacecraft-redis-db
     networks:
       - reactive-solar-fleet-net
@@ -150,7 +151,7 @@ services:
       test: [ "CMD", "redis-cli", "--raw", "incr", "ping" ] 
          
   ms-crewmember-write-db:
-    image: mongo
+    image: mongo:8.0.3-noble
     container_name: ms-crewmember-write-db
     environment:
       MONGO_INITDB_DATABASE: mongo-write-db
@@ -168,7 +169,7 @@ services:
       retries: 3 
   
   ms-crewmember-read-db:
-    image: postgres:latest
+    image: postgres:17.1-alpine
     container_name: ms-crewmember-read-db
     environment:
        POSTGRES_PASSWORD: ${SQLDB_PASS}
@@ -188,7 +189,7 @@ services:
       retries: 5	
     
   ms-crewmember-redis-db:
-    image: redis:latest
+    image: redis:7.4-alpine
     container_name: ms-crewmember-redis-db
     networks:
       - reactive-solar-fleet-net
@@ -200,7 +201,7 @@ services:
    
      
   kafka:
-    image: bitnami/kafka:latest
+    image: bitnami/kafka:3.8
     container_name: kafka
     environment:
       - KAFKA_ENABLE_KRAFT=yes
