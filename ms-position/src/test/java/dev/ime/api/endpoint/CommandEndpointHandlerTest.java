@@ -14,13 +14,13 @@ import org.mockito.Mockito;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.reactive.WebFluxTest;
 import org.springframework.boot.test.context.TestConfiguration;
-import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.context.annotation.Bean;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.security.config.web.server.ServerHttpSecurity;
 import org.springframework.security.config.web.server.ServerHttpSecurity.CsrfSpec;
 import org.springframework.security.web.server.SecurityWebFilterChain;
+import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.web.reactive.server.WebTestClient;
 import org.springframework.web.reactive.function.server.ServerResponse;
 
@@ -38,19 +38,19 @@ import reactor.core.publisher.Mono;
 @WebFluxTest({CommandEndpointHandler.class, CommandEndpointRouter.class})
 class CommandEndpointHandlerTest {
 
-    @MockBean
+	@MockitoBean
 	private CommandServicePort<PositionDto> commandService;
 
-    @MockBean
+	@MockitoBean
 	private DtoValidator dtoValidator;
 
-    @MockBean
+	@MockitoBean
 	private ErrorHandler errorHandler;	
 	
     @Autowired
     private WebTestClient webTestClient;    
 
-    @MockBean
+    @MockitoBean
     private LoggerUtil loggerUtil;
     
 	@TestConfiguration
@@ -72,7 +72,7 @@ class CommandEndpointHandlerTest {
 	    }
 	}
 
-    private final static String PATH = "/api/v1/positions";
+    private static final String PATH = "/api/v1/positions";
 	private Event event;
 	private PositionDto positionDto;
 	
