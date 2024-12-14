@@ -161,7 +161,7 @@ First of all, please visit the REST API documentation. Replace ${port} for the s
 
 The initial data load is performed by the kafka-data-init microservice. It uses Kafka to publish events, which the other microservices then use to update their databases.    
 
-A good way for checking the JWT generation and validation flow, is to review **[this article](https://adictosaltrabajo.com/2023/06/29/securizacion-aplicacion-oauth-2-spring-authorization-server-spring-resource-server/)**. A key difference in my development is that you can register a user using the same microservice at **http://localhost:9000/register**. Here is an example of the info you need to send:
+A good way for checking the JWT generation and validation flow, is to review **[this article](https://adictosaltrabajo.com/2023/06/29/securizacion-aplicacion-oauth-2-spring-authorization-server-spring-resource-server/)**. A key difference in my development is that you can register a user using the same microservice ms-oauth2 at **http://localhost:9000/register**. Here is an example of the info you need to send:
 
 ```
 {
@@ -171,7 +171,7 @@ A good way for checking the JWT generation and validation flow, is to review **[
 	"password":"passpasspass"
 }
 ```
- 
+On the other hand, the protected URL that requires JWT is waiting in the rest of microservices at http://localhost:{port}/actuator/metrics
 
 ## Features
 
