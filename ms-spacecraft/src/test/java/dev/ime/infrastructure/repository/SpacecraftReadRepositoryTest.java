@@ -34,6 +34,7 @@ class SpacecraftReadRepositoryTest {
 	@Autowired
 	private SpacecraftReadRepository spacecraftReadRepository;
 
+	@SuppressWarnings("resource")
 	@Container
 	@ServiceConnection
     static PostgreSQLContainer<?> postgres = new PostgreSQLContainer<>(DockerImageName.parse("postgres:latest"))   

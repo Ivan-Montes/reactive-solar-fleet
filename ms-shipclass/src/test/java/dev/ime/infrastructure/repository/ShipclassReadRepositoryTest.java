@@ -33,6 +33,7 @@ class ShipclassReadRepositoryTest {
     @Autowired
     private ShipclassReadRepository shipclassReadRepository;
 
+	@SuppressWarnings("resource")
 	@Container
 	@ServiceConnection
     static PostgreSQLContainer<?> postgres = new PostgreSQLContainer<>(DockerImageName.parse("postgres:latest"))   

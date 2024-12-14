@@ -33,6 +33,7 @@ class PositionReadRepositoryTest {
     @Autowired
     private PositionReadRepository positionReadRepository;
 
+	@SuppressWarnings("resource")
 	@Container
 	@ServiceConnection
     static PostgreSQLContainer<?> postgres = new PostgreSQLContainer<>(DockerImageName.parse("postgres:latest"))   
